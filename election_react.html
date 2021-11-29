@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <title>Election React App</title>
+  <meta charset="UTF-8" />
+  <script crossorigin="anonymous" src="https://unpkg.com/react@16/umd/react.development.js"></script>
+  <script crossorigin="anonymous" src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+  <script crossorigin="anonymous" src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://unpkg.com/react/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-bootstrap@next/dist/react-bootstrap.min.js"  crossorigin></script>
+  <link rel="stylesheet"  href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"  integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l"  crossorigin="anonymous"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.5.0/font/bootstrap-icons.min.css">
+  <!-- <script src="election.js"></script> -->
+</head>
+
+<body>
+  <h1 class="text-center">Candidate Information</h1>
+
+<div id="app">
+</div>
+<script type="text/babel">
+class App extends React.Component {
+  constructor (props) {
+    super(props)
+    this.state = {
+      id: 0,
+      name: '',
+      vote: 0,
+      percentVote: 0,
+      allCandidates: [{id:1, name:'Anh',vote:0, percentVote:0}],
+      // allCandidates: JSON.parse(localStorage.getItem("election")), //load data from local storage with key='election' 
+      allVotes:0,
+      allNames: []
+     }
+   
+      this.handleChangedName= this.handleChangedName.bind(this)
+      this.handleSubmit = this.handleSubmit.bind(this)
+      this.getCandidates = this.getCandidates.bind(this)
+      this.handleChangedVote = this.handleChangedVote.bind(this)
+      this.handleSortName = this.handleSortName.bind(this)
+      this.handleSortVote = this.handleChangedVote.bind(this)
+      this.removeCandidate = this.removeCandidate.bind(this)
+      this.loadData = this.loadData.bind(this)
+     
+  }
+  //create some functions (react components)
+  
+getBlankState () {
+    var showList = this.state.hasData 
+    return {name: '', vote: '', hasData: showList }
+}
+
+addCandidate (name, vote) {   
+  const newName = this.state.name.trim() 
+  if (!newName) {
+    confirm ("you must enter a name")
+    return
+  }     
+  const newId = this.state.allCandidates.length + 1  
+  this.state.id = newId
+  this.state.allVotes += this.state.vote
+  let allVotes = this.getVotes()
+  // const newPercentVote = (this.state.vote*100)/allVotes 
+  const newPercentVote = this.calcPercentVote(this.state.vote) 
+  let aCandidate= ({id: newId, name:newName, vote:this.state.vote, percentVote: newPercentVote})
+  this.state.allCandidates.push(aCandidate);  
+  this.saveData()  
+ }
+
+ findCandidate (targetName){
+    let result = this.state.allCandidates.find(aCandidate => aCandidate.name === targetName)
+    return result
+  } 
+
+  getVotes () {
+    return this.state.allVotes
+  }
+  calcPercentVote (vote) {
+    let allVotes = this.state.allVotes
+    const newPercentVote = (vote*100)/allVotes
+    return newPercentVote
+}
+
+ getCandidates () {
+   return this.state.allCandidates
+ }
+
+handleChangedName (event) {
+    let newState = this.state
+    newState.name = event.target.value
+    this.setState(newState)
+}
+
+handleChangedVote (event) {
+    let newState = this.state
+    newState.vote = event.target.value
+    this.setState(newState)
+}
+
+handleSubmit (event) {
+  // if (this.state.allCandidates) {
+  //     // get the all candidates from the local storage
+  //     let allCandidates = this.loadData()
+
+  //    if (allCandidates == null) {
+  //       allCandidates = [];
+  //     }
+  this.addCandidate()
+  this.setState(this.getBlankState())
+  // this.loadData()
+// }
+}
+
+handleSortName () {
+  this.state.allCandidates.sort(function(a,b){
+    if (a.name < b.name){
+      return -1
+    }
+    if (a.name > b.name){
+      return 1
+    }
+    return 0;
+  })
+}
+
+allNames () {
+  return this.state.allNames
+}
+
+handleSortVote () {
+  this.state.allCandidates.sort(function(a,b){
+    return (a.vote-b.vote);
+  })
+}
+
+removeCandidate (index) {
+  this.state.allCandidates.splice(index,1);
+  this.setState({
+    allCandidates: [...this.state.allCandidates] //spead operator
+  })
+  // this.saveData()  
+}
+
+saveData(){
+  return localStorage.setItem("election",JSON.stringify(this.state.allCandidates)); // set key='election'
+}
+
+loadData (){
+  return JSON.parse(localStorage.getItem("election"))
+}
+
+/* distructuring 
+ handleChangedFirstName = ({target: value}) => this.setState({firstName: value})
+*/
+
+
+  render () {
+
+    // const {candidates} = this.props
+    return (
+      <section id="electorateManagement">
+      
+        <div className="container"> 
+          <div  className="input-group mb-3">
+          <input id="name" value={this.state.name}  onChange={this.handleChangedName} required type="text"  className="form-control" placeholder="name" aria-label="Candidate's name" aria-describedby="basic-addon2"></input>
+          </div>            
+
+          <div  className="input-group mb-3">
+          <input id="vote"  value={this.state.vote}  onChange={this.handleChangedVote}  required type="number"  className="form-control" placeholder="vote" aria-label="Candidate's vote" aria-describedby="basic-addon2"></input>
+          </div>
+          
+          <div className="d-flex justify-content-between">
+            <button  className="btn btn-primary" type="submit" onClick={this.handleSubmit}>Add</button>                         
+            <button  className="btn btn-primary" type="submit" onClick={this.handleSortName}>sort by name</button>   
+            <button  className="btn btn-primary" type="submit" onClick={this.handleSortVote}>sort by vote</button> 
+          </div>
+
+          <div className="table-data">
+            <p className="fw-bold">Candidate list</p>
+            <table className="table">
+              <thead>
+                <tr>
+                  <th scope="col">Id</th>
+                  <th scope="col">Name</th>
+                  <th scope="col">Vote</th>
+                  <th scope="col">Percent</th>
+                </tr>
+              </thead>
+              <tbody>                    
+                {this.state.allCandidates.map((candidate,index) => (
+                  
+                  <tr key={index}>
+                  <td>{candidate.id}</td>
+                  <td>{candidate.name}</td>
+                  <td>{candidate.vote}</td>
+                  <td>{candidate.percentVote}%</td>
+                  <td><i className="bi bi-trash" onClick = {this.removeCandidate}></i></td>
+                </tr>                   
+                 ))}               
+                           
+              </tbody>         
+            </table> 
+          
+          </div>
+        </div> 
+      </section>
+        
+    )
+  
+  }
+} 
+
+const element = <App />
+ReactDOM.render(
+  element,
+  document.getElementById('app')
+)
+
+</script>
+
+<body>
+</html>
