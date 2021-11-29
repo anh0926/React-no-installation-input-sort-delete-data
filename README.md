@@ -1,6 +1,6 @@
 ## OVERVIEW
 
-This is an input form for an election app build in React. The app is under process so please use it at your on risk. 
+This is an input form for an election app build in React. The app is under process so please use it at your own risk. 
 
 ## FEATURES:
 1.	Create a whole that acts as a Facade for parts 
